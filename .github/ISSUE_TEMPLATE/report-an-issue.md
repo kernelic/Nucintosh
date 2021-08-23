@@ -3,7 +3,7 @@ name: Report an issue
 about: Report an issue
 title: ''
 labels: ''
-assignees: zearp
+assignees: kernelic
 
 ---
 
