@@ -4,7 +4,7 @@ This is fork of [Nucintosh repo](https://github.com/zearp/Nucintosh) with some c
 ![macOS Monterey](https://github.com/zearp/Nucintosh/blob/master/Stuff/Monterey.png?raw=true)
 
 ## Details
-* Works with macOS *Catalina*, *Big Sur*[\*](#big-sur) and *Monterey*[\*](#monterey)
+* Works with macOS *Catalina*, *Big Sur* and *Monterey*
 * OpenCore bootloader with the following kexts:
   - Lilu
   - VirtualSMC
@@ -14,21 +14,20 @@ This is fork of [Nucintosh repo](https://github.com/zearp/Nucintosh) with some c
   - RealtekRTL8111
   - NVMeFix
   - CPUFriend
+  - BlueToolFixup -- fixes bluetooth in Monterey
   - AirportItlwm
-  
+
 ## Index
 * [Installation](#installation)
 * [Post install](#post-install)
 * [Updating](#updating)
-* [Big Sur](#big-sur)
-* [Monterey](#monterey)
 * [Apple and 3rd party wifi/bt](#apple3rd-party-bluetooth-and-wifi)
 * [Intel wifi/bt](#intel-bluetooth-and-wifi)
 * [Native bt dongle](#natively-supported-bluetooth-dongle)
 * [What doesn't work?](#not-workinguntested)
 * [Todo](#todo)
 * [Credits](#credits)
-  
+
 ## Installation
 + BIOS Changes
 ```
@@ -62,9 +61,9 @@ Generate new serials with [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS). Th
 Finally make sure sleep works properly. You can skip some of these but it will make your machine wake up from time to time. Same as real Macs.
 ```
 sudo pmset standby 0
-sudo pmset autopoweroff 0 
+sudo pmset autopoweroff 0
 sudo pmset proximitywake 0
-sudo pmset powernap 0 
+sudo pmset powernap 0
 sudo pmset tcpkeepalive 0
 sudo pmset womp 0
 sudo pmset hibernatemode 0
@@ -83,7 +82,7 @@ sudo rm /var/vm/sleepimage
 sudo mkdir /var/vm/sleepimage
 ```
 
- 
+
 At this point you can also enable FileVault if you want to encrypt your disk. The config is setup to support this and it works flawlessly, to get a nicer boot experience you can remove the verbose boot flag ```-v```in the config and also set ```ShowPicker``` to false. To get the OpenCore picker/menu again hold down the *alt* key when booting.
 
 That's all!
@@ -91,19 +90,8 @@ That's all!
 ## Updating
 Updating is easy, first copy the MLB/ROM/SystemSerialNumber/SystemUUID values from your current config to a text file then delete the whole EFI folder and replace it with the latest release/clone from this repo. Copy your PlatformInfo fields from the text file into the new config. Unless you made other changes this is all thats needed.
 
-## Big Sur
-+ Big Sur needs its own version of AirportItlwm, download the kext [here](https://github.com/zearp/Nucintosh/raw/master/Stuff/AirportItlwm.kext-BigSur.zip) and put it in the kext folder replacing the other one
-+ When you see ```Forcing CS_RUNTIME for entitlement``` displayed macOS did not hang; its sealing the filesystem, do ***not*** reboot!
-
-## Monterey
-Currently all beta builds including beta 4 are working. Only tested upgrading from Big Sur to Monterey with beta 1. From here on out I will pretty much only do clean installs or upgrades from within Monterey.
-
-+ Monterey needs its own version of AirportItlwm, download the kext [here](https://github.com/zearp/Nucintosh/raw/master/Stuff/AirportItlwm.kext-Monterey.zip) and put it in the kext folder replacing the other one
-+ In the config file you must set ```SecureBootModel``` to ```Disabled``` and resetting nvram, in some cases a clean install is needed
-
-
 ## Apple/3rd party bluetooth and wifi
-For both 1st and 3rd party you will need a [supported](https://dortania.github.io/Wireless-Buyers-Guide/) wifi/bluetooth combo card and an adapter (see below) to convert it to M key. As far as I know compatible M key combo cards don't exist. 
+For both 1st and 3rd party you will need a [supported](https://dortania.github.io/Wireless-Buyers-Guide/) wifi/bluetooth combo card and an adapter (see below) to convert it to M key. As far as I know compatible M key combo cards don't exist.
 
 3rd party cards will need these kexts: [AirportBrcmFixup](https://github.com/acidanthera/AirportBrcmFixup) + [BrcmPatchRAM](https://github.com/acidanthera/BrcmPatchRAM), read the instructions on the repo's and you'll be up and running in no time. For some cards you may need to create an entry under devices in the config that disables ASPM, this only needed if you have issues with sleep.
 
@@ -135,9 +123,9 @@ Some sellers on AliExpress have converter cards that already have [the small 1.2
 
 Those other cards (and 3rd party ones) do not come with this connector so you'd have to make your own. Cheaper eBay card came with a cable with standard internal usb header and a cable without any plugs so you can attach your own. Check the listing carefully before ordering. Also make sure it converts to M key and once you have it that the spacing pillar is in the correct position. Don't short the poor Airport out.
 
-- All internal usb ports are already mapped in the USBPorts.kext, if you made your own map you'll need to make a new map if you use the internal usb headers
+- All internal usb ports are already mapped in the USBMap.kext, if you made your own map you'll need to make a new map if you use the internal usb headers
 - When using a 1st or 3rd party combo card you need to disable both bluetooth and wifi in the BIOS and also remove any Intel related bluetooth and wifi kexts
-- You will also need to remove the config block for HS07 used by the onboard Intel wifi/bt card (this was HS10 in previous usb portmaps) from [Info.plist](https://github.com/zearp/Nucintosh/blob/02c221031bbe3845871f2016de25a7a6c6f33e86/EFI/OC/Kexts/USBPorts.kext/Contents/Info.plist#L130-L136) inside USBPorts.kext, without this step bluetooth won't work (properly) after sleep. On 1st party cards it gets "stuck" in HID-proxy mode; bluetooth mouse and keyboard may still work but not optimally and laggy.
+- You will also need to remove the config block for HS07 used by the onboard Intel wifi/bt card (this was HS10 in previous usb portmaps) from Info.plist inside USBMap.kext, without this step bluetooth won't work (properly) after sleep. On 1st party cards it gets "stuck" in HID-proxy mode; bluetooth mouse and keyboard may still work but not optimally and laggy.
 
 You'll also want to set your region to ```#a``` as it allows for full 80mhz channel width on ac cards. It might not be 100% legal depending on where you live. I've used this method on a few DW1820A cards and the speed increase was pretty amazing. This method may also apply when using real Apple cards, you will need add [AirportBrcmFixup](https://github.com/acidanthera/AirportBrcmFixup) on 1st party cards. To change the region simply add the following boot flag ```brcmfx-country=#a```. Make sure your router also supports 80mhz channel width and before doing anything hold down alt while clicking the wifi icon to check the current channel width.
 
@@ -148,19 +136,17 @@ One last thing to remember is that waking the machine from sleep using bluetooth
 + Bluetooth don't works (TODO).
 
 ## Natively supported bluetooth dongle
-I often use these cheap dongles from [eBay](https://www.ebay.co.uk/itm/1PCS-Mini-USB-Bluetooth-V4-0-3Mbps-20M-Dongle-Dual-Mode-Wireless-Adapter-Device/324106977844) that work in macOS out of the box. When going this route don't forget to disable the Intel bluetooth kexts in the config and also disable bluetooth in the BIOS when using a dongle. You will also need to map the port it connects to as internal else sleep will be dodgy. You can do this easily by setting the port type to 255 in the USBPorts.kext info.plist file. You can find the port identifier (example HS03) with Hackintool. Because power isn't cut when entering sleep you can wake the machine up with bluetooth devices.
+I often use these cheap dongles from [eBay](https://www.ebay.co.uk/itm/1PCS-Mini-USB-Bluetooth-V4-0-3Mbps-20M-Dongle-Dual-Mode-Wireless-Adapter-Device/324106977844) that work in macOS out of the box. When going this route don't forget to disable the Intel bluetooth kexts in the config and also disable bluetooth in the BIOS when using a dongle. You will also need to map the port it connects to as internal else sleep will be dodgy. You can do this easily by setting the port type to 255 in the USBMap.kext info.plist file. You can find the port identifier (example HS03) with Hackintool. Because power isn't cut when entering sleep you can wake the machine up with bluetooth devices.
 
 ## Not working/untested
-+ Card reader
-+ Thunderbolt (Type-C)
++ ~~Card reader~~ Fixed. Added new USBMap kext.
++ ~~Thunderbolt (Type-C)~~ Fixed. Added new USBMap kext.
 + Bluetooth
 + AirDrop (because only Wifi works, not Bluetooth)
 + You tell me!
 
 ## Todo
 + Fix Bluetooth and AirDrop (OpenIntelWireless Bluetooth kexts don't work, i would like to learn this issue)
-+ Fix Thunderbolt (3th party Type-C connector, in progress)
-+ Fix Card reader (in progress)
 
 ## Credits
 * [@zearp](https://github.com/zearp) for that incredible guide and main repo: https://github.com/zearp/Nucintosh
